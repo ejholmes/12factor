@@ -14,5 +14,5 @@ A process is an individual
 
 ## Packages
 
-* [scheduler]: Provides an interface and various implementations for running 12factor apps. Implementations include Docker, ECS, Kubernetes and Nomad.
-* [procfile]: Provides methods for parsing the Procfile manifest format.
+* **[scheduler](./scheduler)**: Provides an interface and various implementations for running 12factor apps. Implementations include Docker, ECS, Kubernetes and Nomad.
+* **[procfile](./procfile)**: Provides methods for parsing the Procfile manifest format.
