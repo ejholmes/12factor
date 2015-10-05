@@ -13,6 +13,9 @@ type App struct {
 	// Name of the application.
 	Name string
 
+	// A string representing the version of this App.
+	Version string
+
 	// The container image for this app.
 	Image string
 
