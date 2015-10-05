@@ -15,10 +15,10 @@ type ProcessRunner interface {
 	RunProcess(app string, process Process) error
 }
 
-// Scaler is an interface that wraps the basic Scale method for scaling a
+// ProcessScaler is an interface that wraps the basic Scale method for scaling a
 // process by name for an application.
-type Scaler interface {
-	Scale(app, process string, desired int) error
+type ProcessScaler interface {
+	ScaleProcess(app, process string, desired int) error
 }
 
 // Remover is an interface that wraps the basic Remove method for removing an
