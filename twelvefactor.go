@@ -26,6 +26,10 @@ type App struct {
 // Process represents an individual Process of an App, which defines the image
 // to run as well as the command.
 type Process struct {
+	// A unique identifier for this process, within the scope of the app.
+	// Generally this would be something like "web" or "worker.
+	Name string
+
 	// The command to run when running this process.
 	Command string
 
