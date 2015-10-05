@@ -3,7 +3,7 @@ package twelvefactor
 // Runner is an interface that wraps the basic Run method, providing a way to
 // run a 12factor application.
 type Runner interface {
-	Run(*App) error
+	Run(App) error
 }
 
 // ProcessRunner is an optional interface for running attached and detached
@@ -12,7 +12,7 @@ type Runner interface {
 //
 // Attached vs Detached is determined from the Stdout stream.
 type ProcessRunner interface {
-	RunAttached(app string, process Process) error
+	RunProcess(app string, process Process) error
 }
 
 // Scaler is an interface that wraps the basic Scale method for scaling a
@@ -24,7 +24,19 @@ type Scaler interface {
 // Remover is an interface that wraps the basic Remove method for removing an
 // app and all of it's processes.
 type Remover interface {
-	Remove(app) error
+	Remove(app string) error
+}
+
+// Restarter is an interface that wraps the Restart method, which provides a
+// method for restarting an App.
+type Restarter interface {
+	Restart(app string) error
+}
+
+// ProcessRestarter is an interface that wraps the RestartProcess method, which
+// provides a method for restarting a Process.
+type ProcessRestarter interface {
+	RestartProcess(app string, process string) error
 }
 
 // Scheduler provides an interface for running twelve factor applications.
@@ -32,4 +44,10 @@ type Scheduler interface {
 	Runner
 	Scaler
 	Remover
+
+	// Returns the tasks for the given application.
+	Tasks(app string) ([]Task, error)
+
+	// Stops an individual task.
+	StopTask(taskID string) error
 }

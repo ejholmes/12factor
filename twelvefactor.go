@@ -2,6 +2,8 @@
 // which are defined in http://12factor.net/
 package twelvefactor
 
+import "time"
+
 // App represents a 12factor application. We define an application has a
 // collection of processes that share a common environment.
 type App struct {
@@ -53,6 +55,18 @@ type Process struct {
 
 	// The number of CPU Shares to allocate to this process.
 	CPUShares int
+}
+
+// Task represents the state of an individual instance of a Process.
+type Task struct {
+	// A globally unique identifier for this task.
+	ID string
+
+	// The state that this task is in.
+	State string
+
+	// The time that this state was recorded at.
+	Time time.Time
 }
 
 // Stdout is an interface that represents a the location to send Stdout to.
