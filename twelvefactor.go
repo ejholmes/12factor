@@ -2,6 +2,8 @@
 // which are defined in http://12factor.net/
 package twelvefactor
 
+import "io"
+
 // App represents a 12factor application. We define an application has a
 // collection of processes that share a common environment.
 type App struct {
@@ -34,6 +36,13 @@ type Process struct {
 	// Free form labels to attach to this process.
 	Labels map[string]string
 
+	// Where Stdout for this process should go to.
+	Stdout Stdout
+
+	// Where Stdin for this process should come from. The zero value is to
+	// not attach Stdin.
+	Stdin Stdin
+
 	// The desired number of instances to run.
 	DesiredCount int
 
@@ -42,4 +51,14 @@ type Process struct {
 
 	// The number of CPU Shares to allocate to this process.
 	CPUShares int
+}
+
+// Stdout is an interface that represents a the location to send Stdout to.
+type Stdout interface {
+	io.Writer
+}
+
+// Stdin represents the location to get Stdin from.
+type Stdin interface {
+	io.Reader
 }

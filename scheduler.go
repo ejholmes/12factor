@@ -1,24 +1,18 @@
 package twelvefactor
 
-import "io"
-
 // Runner is an interface that wraps the basic Run method, providing a way to
 // run a 12factor application.
 type Runner interface {
 	Run(*App) error
 }
 
-// DetachedRunner is an optional interface for running a detached processes. This
-// is useful for running long running management tasks, such as database
-// migrations.
-type DetachedRunner interface {
-	RunDetached(app string, process Process) error
-}
-
-// AttachedRunner is an optional interface for running attached processes. This
-// is usefuly for running attached processes like a rails console.
-type AttachedRunner interface {
-	RunAttached(app string, process Process, in io.Reader, out io.Writer) error
+// ProcessRunner is an optional interface for running attached and detached
+// processes. This is usefuly for running attached processes like a rails
+// console or detached processes like database migrations.
+//
+// Attached vs Detached is determined from the Stdout stream.
+type ProcessRunner interface {
+	RunAttached(app string, process Process) error
 }
 
 // Scaler is an interface that wraps the basic Scale method for scaling a
