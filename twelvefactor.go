@@ -30,4 +30,16 @@ type Process struct {
 	// Additional environment variables to merge with the App's environment
 	// when running this process.
 	Env map[string]string
+
+	// Free form labels to attach to this process.
+	Labels map[string]string
+
+	// The desired number of instances to run.
+	DesiredCount int
+
+	// The amount of memory to allocate to this process, in bytes.
+	MemoryLimit int
+
+	// The number of CPU Shares to allocate to this process.
+	CPUShares int
 }
