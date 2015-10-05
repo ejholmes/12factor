@@ -11,6 +11,9 @@ type App struct {
 	// Name of the application.
 	Name string
 
+	// The container image for this app.
+	Image string
+
 	// The shared environment variables for the individual processes.
 	Env map[string]string
 
@@ -21,9 +24,6 @@ type App struct {
 // Process represents an individual Process of an App, which defines the image
 // to run as well as the command.
 type Process struct {
-	// The container image to run when running this process.
-	Image string
-
 	// The command to run when running this process.
 	Command string
 
