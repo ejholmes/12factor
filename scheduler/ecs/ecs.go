@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/remind101/12factor"
+	"github.com/remind101/12factor/pkg/aws/arn"
 )
 
 // ProcessNotFoundError is returned when attempting to operate on a process that
@@ -119,8 +120,13 @@ func (s *Scheduler) ServiceTasks(service string) ([]twelvefactor.Task, error) {
 
 	var tasks []twelvefactor.Task
 	for _, task := range describeResp.Tasks {
+		id, err := arn.ResourceID(*task.TaskArn)
+		if err != nil {
+			return nil, err
+		}
+
 		tasks = append(tasks, twelvefactor.Task{
-			ID:    *task.TaskArn,
+			ID:    id,
 			State: *task.LastStatus,
 		})
 	}

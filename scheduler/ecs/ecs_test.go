@@ -105,7 +105,7 @@ func TestScheduler_Tasks(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, tasks, []twelvefactor.Task{
 		{
-			ID:    "arn:aws:ecs:us-east-1:012345678910:task/0b69d5c0-d655-4695-98cd-5d2d526d9d5a",
+			ID:    "0b69d5c0-d655-4695-98cd-5d2d526d9d5a",
 			State: "RUNNING",
 		},
 	})
