@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/remind101/12factor"
-	"github.com/remind101/12factor/schedulers/docker"
+	"github.com/remind101/12factor/scheduler/docker"
 )
 
 // app is our test application. This is a valid application that will be run
