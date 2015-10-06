@@ -42,8 +42,10 @@ type ProcessRestarter interface {
 // Scheduler provides an interface for running twelve factor applications.
 type Scheduler interface {
 	Runner
-	Scaler
 	Remover
+	ProcessScaler
+	Restarter
+	ProcessRestarter
 
 	// Returns the tasks for the given application.
 	Tasks(app string) ([]Task, error)

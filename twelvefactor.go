@@ -34,7 +34,7 @@ type Process struct {
 	Name string
 
 	// The command to run when running this process.
-	Command string
+	Command []string
 
 	// Additional environment variables to merge with the App's environment
 	// when running this process.
