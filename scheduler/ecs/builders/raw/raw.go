@@ -2,12 +2,14 @@
 package raw
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/remind101/12factor"
-	"github.com/remind101/empire/pkg/arn"
+	"github.com/remind101/12factor/pkg/aws/arn"
+	"github.com/remind101/12factor/pkg/bytesize"
 )
 
 // DefaultDelimiter is the default delimiter used to delineate between app and
@@ -17,6 +19,8 @@ const DefaultDelimiter = "--"
 type ecsClient interface {
 	ListServicesPages(*ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool) error
 	DeleteService(*ecs.DeleteServiceInput) (*ecs.DeleteServiceOutput, error)
+	RegisterTaskDefinition(*ecs.RegisterTaskDefinitionInput) (*ecs.RegisterTaskDefinitionOutput, error)
+	CreateService(*ecs.CreateServiceInput) (*ecs.CreateServiceOutput, error)
 }
 
 // StackBuilder implements the StackBuilder interface for the ECS scheduler.
@@ -28,14 +32,79 @@ type StackBuilder struct {
 	// process. The zero value is DefaultDelimiter.
 	Delimiter string
 
+	// ServiceRole is the name of an IAM role to attach to ECS services that
+	// have ELB's attached.
+	ServiceRole string
+
 	ecs ecsClient
 }
 
-func (b *StackBuilder) Build(twelvefactor.App) error {
-	// Find ECS services
-	// Create ECS services
-	// Remove old ECS services
+// Build creates or updates ECS services for the app.
+func (b *StackBuilder) Build(app twelvefactor.App) error {
+	for _, process := range app.Processes {
+		if err := b.CreateService(app, process); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// CreateService creates an ECS service for the Process.
+func (b *StackBuilder) CreateService(app twelvefactor.App, process twelvefactor.Process) error {
+	name := strings.Join([]string{app.ID, process.Name}, b.delimiter())
+
+	taskDefinition, err := b.RegisterTaskDefinition(app, process)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.ecs.CreateService(&ecs.CreateServiceInput{
+		Cluster:        aws.String(b.Cluster),
+		DesiredCount:   aws.Int64(int64(process.DesiredCount)),
+		Role:           aws.String(b.ServiceRole),
+		ServiceName:    aws.String(name),
+		TaskDefinition: aws.String(taskDefinition),
+	})
+	return err
+}
+
+func (b *StackBuilder) RegisterTaskDefinition(app twelvefactor.App, process twelvefactor.Process) (string, error) {
+	family := strings.Join([]string{app.ID, process.Name}, b.delimiter())
+
+	var command []*string
+	for _, s := range process.Command {
+		ss := s
+		command = append(command, &ss)
+	}
+
+	var environment []*ecs.KeyValuePair
+	for k, v := range twelvefactor.MergeEnv(app.Env, process.Env) {
+		environment = append(environment, &ecs.KeyValuePair{
+			Name:  aws.String(k),
+			Value: aws.String(v),
+		})
+	}
+
+	resp, err := b.ecs.RegisterTaskDefinition(&ecs.RegisterTaskDefinitionInput{
+		Family: aws.String(family),
+		ContainerDefinitions: []*ecs.ContainerDefinition{
+			{
+				Name:        aws.String(process.Name),
+				Cpu:         aws.Int64(int64(process.CPUShares)),
+				Command:     command,
+				Image:       aws.String(app.Image),
+				Essential:   aws.Bool(true),
+				Memory:      aws.Int64(int64(process.Memory / int(bytesize.MB))),
+				Environment: environment,
+			},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s:%d", *resp.TaskDefinition.Family, *resp.TaskDefinition.Revision), nil
 }
 
 // Iterates through all of the ECS services for this app and removes them.

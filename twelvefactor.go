@@ -54,7 +54,7 @@ type Process struct {
 	DesiredCount int
 
 	// The amount of memory to allocate to this process, in bytes.
-	MemoryLimit int
+	Memory int
 
 	// The number of CPU Shares to allocate to this process.
 	CPUShares int
@@ -77,3 +77,14 @@ type Stdout interface{}
 
 // Stdin represents the location to get Stdin from.
 type Stdin interface{}
+
+// Merges the maps together, favoring keys from the right to the left.
+func MergeEnv(envs ...map[string]string) map[string]string {
+	merged := make(map[string]string)
+	for _, env := range envs {
+		for k, v := range env {
+			merged[k] = v
+		}
+	}
+	return merged
+}

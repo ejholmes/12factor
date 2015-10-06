@@ -5,9 +5,88 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/remind101/12factor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+func TestStackBuilder_Build(t *testing.T) {
+	c := new(mockECSClient)
+	b := &StackBuilder{
+		Cluster: "cluster",
+		ecs:     c,
+	}
+
+	app := twelvefactor.App{
+		Name: "app",
+		ID:   "app",
+		Env: map[string]string{
+			"RAILS_ENV": "production",
+		},
+		Processes: []twelvefactor.Process{
+			{
+				Name: "web",
+			},
+		},
+	}
+
+	c.On("RegisterTaskDefinition", &ecs.RegisterTaskDefinitionInput{
+		Family: aws.String("app--web"),
+		ContainerDefinitions: []*ecs.ContainerDefinition{
+			{
+				Name:      aws.String("web"),
+				Cpu:       aws.Int64(0),
+				Memory:    aws.Int64(0),
+				Image:     aws.String(""),
+				Essential: aws.Bool(true),
+				Environment: []*ecs.KeyValuePair{
+					{
+						Name:  aws.String("RAILS_ENV"),
+						Value: aws.String("production"),
+					},
+				},
+			},
+		},
+	}).Return(&ecs.RegisterTaskDefinitionOutput{
+		TaskDefinition: &ecs.TaskDefinition{
+			Family:   aws.String("app--web"),
+			Revision: aws.Int64(1),
+		},
+	}, nil)
+	c.On("CreateService", &ecs.CreateServiceInput{
+		Cluster:        aws.String("cluster"),
+		DesiredCount:   aws.Int64(0),
+		Role:           aws.String(""),
+		ServiceName:    aws.String("app--web"),
+		TaskDefinition: aws.String("app--web:1"),
+	}).Return(&ecs.CreateServiceOutput{}, nil)
+	err := b.Build(app)
+	assert.NoError(t, err)
+}
+
+func TestStackBuilder_Remove(t *testing.T) {
+	c := new(mockECSClient)
+	b := &StackBuilder{
+		Cluster: "cluster",
+		ecs:     c,
+	}
+
+	c.On("ListServicesPages", &ecs.ListServicesInput{
+		Cluster: aws.String("cluster"),
+	}).Return(nil, []*ecs.ListServicesOutput{
+		{
+			ServiceArns: []*string{
+				aws.String("arn:aws:ecs:us-east-1:012345678910:service/app--web"),
+			},
+		},
+	})
+	c.On("DeleteService", &ecs.DeleteServiceInput{
+		Cluster: aws.String("cluster"),
+		Service: aws.String("app--web"),
+	}).Return(&ecs.DeleteServiceOutput{}, nil)
+	err := b.Remove("app")
+	assert.NoError(t, err)
+}
 
 func TestStackBuilder_Services(t *testing.T) {
 	c := new(mockECSClient)
@@ -86,30 +165,6 @@ func TestStackBuilder_Services_Dirty(t *testing.T) {
 	})
 }
 
-func TestStackBuilder_Remove(t *testing.T) {
-	c := new(mockECSClient)
-	b := &StackBuilder{
-		Cluster: "cluster",
-		ecs:     c,
-	}
-
-	c.On("ListServicesPages", &ecs.ListServicesInput{
-		Cluster: aws.String("cluster"),
-	}).Return(nil, []*ecs.ListServicesOutput{
-		{
-			ServiceArns: []*string{
-				aws.String("arn:aws:ecs:us-east-1:012345678910:service/app--web"),
-			},
-		},
-	})
-	c.On("DeleteService", &ecs.DeleteServiceInput{
-		Cluster: aws.String("cluster"),
-		Service: aws.String("app--web"),
-	}).Return(&ecs.DeleteServiceOutput{}, nil)
-	err := b.Remove("app")
-	assert.NoError(t, err)
-}
-
 // mockECSClient is an implementation of the ecsClient interface for testing.
 type mockECSClient struct {
 	mock.Mock
@@ -128,4 +183,14 @@ func (c *mockECSClient) ListServicesPages(input *ecs.ListServicesInput, fn func(
 func (c *mockECSClient) DeleteService(input *ecs.DeleteServiceInput) (*ecs.DeleteServiceOutput, error) {
 	args := c.Called(input)
 	return args.Get(0).(*ecs.DeleteServiceOutput), args.Error(1)
+}
+
+func (c *mockECSClient) RegisterTaskDefinition(input *ecs.RegisterTaskDefinitionInput) (*ecs.RegisterTaskDefinitionOutput, error) {
+	args := c.Called(input)
+	return args.Get(0).(*ecs.RegisterTaskDefinitionOutput), args.Error(1)
+}
+
+func (c *mockECSClient) CreateService(input *ecs.CreateServiceInput) (*ecs.CreateServiceOutput, error) {
+	args := c.Called(input)
+	return args.Get(0).(*ecs.CreateServiceOutput), args.Error(1)
 }
