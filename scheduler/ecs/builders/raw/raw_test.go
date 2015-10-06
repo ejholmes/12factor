@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/remind101/12factor"
+	"github.com/remind101/12factor/pkg/bytesize"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -25,7 +26,9 @@ func TestStackBuilder_Build(t *testing.T) {
 		},
 		Processes: []twelvefactor.Process{
 			{
-				Name: "web",
+				Name:      "web",
+				CPUShares: 256,
+				Memory:    int(1 * bytesize.GB),
 			},
 		},
 	}
@@ -35,8 +38,8 @@ func TestStackBuilder_Build(t *testing.T) {
 		ContainerDefinitions: []*ecs.ContainerDefinition{
 			{
 				Name:      aws.String("web"),
-				Cpu:       aws.Int64(0),
-				Memory:    aws.Int64(0),
+				Cpu:       aws.Int64(256),
+				Memory:    aws.Int64(1024),
 				Image:     aws.String(""),
 				Essential: aws.Bool(true),
 				Environment: []*ecs.KeyValuePair{
