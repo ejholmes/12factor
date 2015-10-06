@@ -11,7 +11,6 @@ type StackBuilder interface {
 	// Remove removes the stack of AWS resources for the app.
 	Remove(app string) error
 
-	// Service returns the name of the ECS services for the given process
-	// name.
-	Service(app, process string) (string, error)
+	// Services returns a mapping of process name to ECS service name.
+	Services(app string) (map[string]string, error)
 }
