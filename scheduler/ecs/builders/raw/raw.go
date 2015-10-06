@@ -16,6 +16,7 @@ const DefaultDelimiter = "--"
 
 type ecsClient interface {
 	ListServicesPages(*ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool) error
+	DeleteService(*ecs.DeleteServiceInput) (*ecs.DeleteServiceOutput, error)
 }
 
 // StackBuilder implements the StackBuilder interface for the ECS scheduler.
@@ -38,9 +39,22 @@ func (b *StackBuilder) Build(twelvefactor.App) error {
 	return nil
 }
 
+// Iterates through all of the ECS services for this app and removes them.
 func (b *StackBuilder) Remove(app string) error {
-	// Find ECS services
-	// Remove them
+	services, err := b.Services(app)
+	if err != nil {
+		return err
+	}
+
+	for _, service := range services {
+		if _, err := b.ecs.DeleteService(&ecs.DeleteServiceInput{
+			Cluster: aws.String(b.Cluster),
+			Service: aws.String(service),
+		}); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -80,8 +94,8 @@ func (b *StackBuilder) Services(app string) (map[string]string, error) {
 	return services, nil
 }
 
-func (b *StackBuilder) split(serviceName string) (app, process string, ok bool) {
-	parts := strings.SplitN(serviceName, b.delimiter(), 2)
+func (b *StackBuilder) split(service string) (app, process string, ok bool) {
+	parts := strings.SplitN(service, b.delimiter(), 2)
 	if len(parts) != 2 {
 		return
 	}

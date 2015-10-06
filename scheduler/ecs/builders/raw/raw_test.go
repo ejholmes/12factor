@@ -86,6 +86,30 @@ func TestStackBuilder_Services_Dirty(t *testing.T) {
 	})
 }
 
+func TestStackBuilder_Remove(t *testing.T) {
+	c := new(mockECSClient)
+	b := &StackBuilder{
+		Cluster: "cluster",
+		ecs:     c,
+	}
+
+	c.On("ListServicesPages", &ecs.ListServicesInput{
+		Cluster: aws.String("cluster"),
+	}).Return(nil, []*ecs.ListServicesOutput{
+		{
+			ServiceArns: []*string{
+				aws.String("arn:aws:ecs:us-east-1:012345678910:service/app--web"),
+			},
+		},
+	})
+	c.On("DeleteService", &ecs.DeleteServiceInput{
+		Cluster: aws.String("cluster"),
+		Service: aws.String("app--web"),
+	}).Return(&ecs.DeleteServiceOutput{}, nil)
+	err := b.Remove("app")
+	assert.NoError(t, err)
+}
+
 // mockECSClient is an implementation of the ecsClient interface for testing.
 type mockECSClient struct {
 	mock.Mock
@@ -99,4 +123,9 @@ func (c *mockECSClient) ListServicesPages(input *ecs.ListServicesInput, fn func(
 		}
 	}
 	return args.Error(0)
+}
+
+func (c *mockECSClient) DeleteService(input *ecs.DeleteServiceInput) (*ecs.DeleteServiceOutput, error) {
+	args := c.Called(input)
+	return args.Get(0).(*ecs.DeleteServiceOutput), args.Error(1)
 }
