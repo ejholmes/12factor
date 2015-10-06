@@ -28,8 +28,7 @@ type StackBuilder struct {
 	// process. The zero value is DefaultDelimiter.
 	Delimiter string
 
-	ecs       ecsClient
-	splitFunc func(string) (app, process string)
+	ecs ecsClient
 }
 
 func (b *StackBuilder) Build(twelvefactor.App) error {
