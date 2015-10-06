@@ -42,11 +42,17 @@ type Scheduler struct {
 	stackBuilder StackBuilder
 }
 
-// NewScheduler returns a new Scheduler instance backed by the given ECS client.
-func NewScheduler(c *ecs.ECS) *Scheduler {
+// newScheduler returns a new Scheduler instance backed by the given ECS client.
+func newScheduler(c *ecs.ECS) *Scheduler {
 	return &Scheduler{
 		ecs: c,
 	}
+}
+
+// NewScheduler builds a new Scheduler instance backed by an ECS client
+// that's configured with the given config.
+func NewScheduler(config *aws.Config) *Scheduler {
+	return newScheduler(ecs.New(config))
 }
 
 // Run creates or updates the associated ECS services for the individual
