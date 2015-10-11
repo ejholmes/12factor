@@ -79,7 +79,7 @@ func (b *StackBuilder) RegisterTaskDefinition(app twelvefactor.App, process twel
 	}
 
 	var environment []*ecs.KeyValuePair
-	for k, v := range twelvefactor.MergeEnv(app.Env, process.Env) {
+	for k, v := range twelvefactor.ProcessEnv(app, process) {
 		environment = append(environment, &ecs.KeyValuePair{
 			Name:  aws.String(k),
 			Value: aws.String(v),

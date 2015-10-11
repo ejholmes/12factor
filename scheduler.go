@@ -2,6 +2,11 @@ package twelvefactor
 
 // Runner is an interface that wraps the basic Run method, providing a way to
 // run a 12factor application.
+//
+// Implementors should ensure that any existing processes that don't exist in
+// the newly submitted process list are removed. For example, if a "web" process
+// was previously defined, then only a "worker" process was submitted, the
+// existing "web" process should be removed.
 type Runner interface {
 	Run(App, ...Process) error
 }

@@ -75,6 +75,12 @@ type Stdout interface{}
 // Stdin represents the location to get Stdin from.
 type Stdin interface{}
 
+// ProcessEnv merges the App environment with any environment variables provided
+// in the process.
+func ProcessEnv(app App, process Process) map[string]string {
+	return MergeEnv(app.Env, process.Env)
+}
+
 // Merges the maps together, favoring keys from the right to the left.
 func MergeEnv(envs ...map[string]string) map[string]string {
 	merged := make(map[string]string)
