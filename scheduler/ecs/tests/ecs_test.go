@@ -19,11 +19,12 @@ var app = twelvefactor.App{
 	Env: map[string]string{
 		"RAILS_ENV": "production",
 	},
-	Processes: []twelvefactor.Process{
-		{
-			Name:    "web",
-			Command: []string{"acme-inc", "web"},
-		},
+}
+
+var processes = []twelvefactor.Process{
+	{
+		Name:    "web",
+		Command: []string{"acme-inc", "web"},
 	},
 }
 

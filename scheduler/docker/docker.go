@@ -32,6 +32,6 @@ func NewSchedulerFromEnv() (*Scheduler, error) {
 }
 
 // Run runs the application with Docker.
-func (s *Scheduler) Run(app twelvefactor.App) error {
+func (s *Scheduler) Run(app twelvefactor.App, processes ...twelvefactor.Process) error {
 	return nil
 }

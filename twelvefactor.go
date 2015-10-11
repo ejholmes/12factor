@@ -21,9 +21,6 @@ type App struct {
 
 	// The shared environment variables for the individual processes.
 	Env map[string]string
-
-	// The Processes that compose this application.
-	Processes []Process
 }
 
 // Process represents an individual Process of an App, which defines the image

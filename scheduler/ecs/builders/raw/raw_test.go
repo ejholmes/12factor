@@ -24,12 +24,13 @@ func TestStackBuilder_Build(t *testing.T) {
 		Env: map[string]string{
 			"RAILS_ENV": "production",
 		},
-		Processes: []twelvefactor.Process{
-			{
-				Name:      "web",
-				CPUShares: 256,
-				Memory:    int(1 * bytesize.GB),
-			},
+	}
+
+	processes := []twelvefactor.Process{
+		{
+			Name:      "web",
+			CPUShares: 256,
+			Memory:    int(1 * bytesize.GB),
 		},
 	}
 
@@ -63,7 +64,7 @@ func TestStackBuilder_Build(t *testing.T) {
 		ServiceName:    aws.String("app--web"),
 		TaskDefinition: aws.String("app--web:1"),
 	}).Return(&ecs.CreateServiceOutput{}, nil)
-	err := b.Build(app)
+	err := b.Build(app, processes...)
 	assert.NoError(t, err)
 }
 

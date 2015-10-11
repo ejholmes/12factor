@@ -3,7 +3,7 @@ package twelvefactor
 // Runner is an interface that wraps the basic Run method, providing a way to
 // run a 12factor application.
 type Runner interface {
-	Run(App) error
+	Run(App, ...Process) error
 }
 
 // ProcessRunner is an optional interface for running attached and detached

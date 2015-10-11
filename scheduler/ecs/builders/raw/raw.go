@@ -40,8 +40,8 @@ type StackBuilder struct {
 }
 
 // Build creates or updates ECS services for the app.
-func (b *StackBuilder) Build(app twelvefactor.App) error {
-	for _, process := range app.Processes {
+func (b *StackBuilder) Build(app twelvefactor.App, processes ...twelvefactor.Process) error {
+	for _, process := range processes {
 		if err := b.CreateService(app, process); err != nil {
 			return err
 		}
