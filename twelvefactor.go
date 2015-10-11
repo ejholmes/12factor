@@ -62,6 +62,12 @@ type Task struct {
 	// A globally unique identifier for this task.
 	ID string
 
+	// The app version that this task relates to.
+	Version string
+
+	// The process that this task relates to.
+	Process string
+
 	// The state that this task is in.
 	State string
 
