@@ -137,7 +137,7 @@ type mockStackBuilder struct {
 	mock.Mock
 }
 
-func (b *mockStackBuilder) Build(app twelvefactor.App) error {
+func (b *mockStackBuilder) Build(app twelvefactor.App, processes ...twelvefactor.Process) error {
 	args := b.Called(app)
 	return args.Error(0)
 }

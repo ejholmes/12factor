@@ -29,11 +29,11 @@ var processes = []twelvefactor.Process{
 }
 
 func TestScheduler_Run(t *testing.T) {
-	//s := newScheduler(t)
+	s := newScheduler(t)
 
-	//if err := s.Run(app); err != nil {
-	//t.Fatal(err)
-	//}
+	if err := s.Run(app, processes...); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func newScheduler(t testing.TB) *ecs.Scheduler {

@@ -6,7 +6,7 @@ import "github.com/remind101/12factor"
 // resources for the App.
 type StackBuilder interface {
 	// Build provisions the stack of AWS resources for the app.
-	Build(twelvefactor.App) error
+	Build(twelvefactor.App, ...twelvefactor.Process) error
 
 	// Remove removes the stack of AWS resources for the app.
 	Remove(app string) error

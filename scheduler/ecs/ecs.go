@@ -57,8 +57,8 @@ func NewScheduler(config *aws.Config) *Scheduler {
 
 // Run creates or updates the associated ECS services for the individual
 // processes within the application and runs them.
-func (s *Scheduler) Run(app twelvefactor.App) error {
-	return s.stackBuilder.Build(app)
+func (s *Scheduler) Run(app twelvefactor.App, processes ...twelvefactor.Process) error {
+	return s.stackBuilder.Build(app, processes...)
 }
 
 // Remove removes the app and it's associated AWS resources.
