@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/remind101/12factor"
 	"github.com/remind101/12factor/pkg/aws/arn"
+	"github.com/remind101/12factor/scheduler/ecs/builders/raw"
 )
 
 // ProcessNotFoundError is returned when attempting to operate on a process that
@@ -42,17 +43,13 @@ type Scheduler struct {
 	stackBuilder StackBuilder
 }
 
-// newScheduler returns a new Scheduler instance backed by the given ECS client.
-func newScheduler(c *ecs.ECS) *Scheduler {
-	return &Scheduler{
-		ecs: c,
-	}
-}
-
 // NewScheduler builds a new Scheduler instance backed by an ECS client
 // that's configured with the given config.
 func NewScheduler(config *aws.Config) *Scheduler {
-	return newScheduler(ecs.New(config))
+	return &Scheduler{
+		ecs:          ecs.New(config),
+		stackBuilder: raw.NewStackBuilder(config),
+	}
 }
 
 // Run creates or updates the associated ECS services for the individual
@@ -114,6 +111,11 @@ func (s *Scheduler) ServiceTasks(service string) ([]twelvefactor.Task, error) {
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	// No tasks.
+	if len(listResp.TaskArns) == 0 {
+		return nil, nil
 	}
 
 	describeResp, err := s.ecs.DescribeTasks(&ecs.DescribeTasksInput{

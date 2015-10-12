@@ -39,6 +39,14 @@ type StackBuilder struct {
 	ecs ecsClient
 }
 
+// NewStackBuilder returns a new StackBuilder instance with an ecs client
+// configured from config.
+func NewStackBuilder(config *aws.Config) *StackBuilder {
+	return &StackBuilder{
+		ecs: ecs.New(config),
+	}
+}
+
 // Build creates or updates ECS services for the app.
 func (b *StackBuilder) Build(app twelvefactor.App, processes ...twelvefactor.Process) error {
 	for _, process := range processes {
